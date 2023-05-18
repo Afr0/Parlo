@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <GenerateTargetFrameworkAttribute>False</GenerateTargetFrameworkAttribute>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Parlo</Title>
+    <Authors>matsvederhus</Authors>
+    <PackageProjectUrl>http://www.github.com/afr0/parlo</PackageProjectUrl>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <PackageTags>UDP;TCP;network;networking;encryption;security</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <Description>A simple and scalable networking library for .NET Standard. Supports TCP and UDP with optional reliable delivery.
+Applies adaptive compression with GZip to packets for extra smooth network traffic.</Description>
+    <Copyright>Copyright Mats Vederhus</Copyright>
+    <RepositoryUrl>https://github.com/Afr0/Parlo.git</RepositoryUrl>
+    <PackageReleaseNotes>Initial release!
+Has full support for TCP, UDP with optional reliability, as well as encryption with AES or Twofish.</PackageReleaseNotes>
+    <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <DefineConstants>WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' == 'Unix'">
+    <DefineConstants>LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' == 'OSX'">
+    <DefineConstants>MACOS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="*.png" />
+    <Compile Remove="*.md" />
+    <Compile Remove="*.gitignore" />
+    <Compile Remove="*.gitattributes" />
+    <Compile Remove="*.csproj.user" />
+    <Compile Remove="Properties\**" />
+    <Compile Remove="tests\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <EmbeddedResource Remove="tests\**" />
+    <None Remove="Properties\**" />
+    <None Remove="tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
+    <None Remove="LICENSE" />
+    <None Remove="Logo.png" />
+    <None Remove="packages.config" />
+    <None Remove="README.md" />
+  </ItemGroup>
+
+</Project>
