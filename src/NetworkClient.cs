@@ -352,7 +352,7 @@ namespace Parlo
         /// <summary>
         /// Fired when this MetworkClient instance received a packet about the server's impending disconnection.
         /// </summary>
-	public event ServerDisconnectedDelegate OnServerDisconnected;
+	    public event ServerDisconnectedDelegate OnServerDisconnected;
 
         /// <summary>
         /// Fired when this NetworkClient instance missed too many heartbeats.
@@ -628,7 +628,7 @@ namespace Parlo
         /// Resends packets that have not been acknowledged by the other party.
         /// </summary>
         /// <returns>An awaitable task.</returns>
-        private async Task ResendTimedOutPacketsAsync()
+        protected async Task ResendTimedOutPacketsAsync()
         {
             TimeSpan Timeout = TimeSpan.FromSeconds(m_UDPTimeout); // Set the desired timeout for packets
 
@@ -674,6 +674,8 @@ namespace Parlo
                         (byte[], DateTime, int) Value;
                         m_SentPackets.TryRemove(Key, out Value);
                     }
+
+                    KeysToRemove.Clear();
                 }
                 catch (Exception Ex)
                 {
@@ -822,6 +824,7 @@ namespace Parlo
                     //Receive the data and store the sender's endpoint
                     SocketReceiveFromResult Result = await m_Sock.ReceiveFromAsync(new ArraySegment<byte>(ReceiveBuffer),
                         SocketFlags.None, new IPEndPoint(IPAddress.Parse(m_Sock.Address), 0));
+                        SocketFlags.None, new IPEndPoint(IPAddress.Parse(m_Sock.Address), m_Sock.Port));
 
                     //Process the received data
                     byte[] ReceivedData = new byte[Result.ReceivedBytes];
