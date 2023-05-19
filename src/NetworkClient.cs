@@ -137,10 +137,21 @@ namespace Parlo
         /// </summary>
         public const int MaxIPv6UDPPayloadSize = MTU - 40 - 8;
 
-        private CancellationTokenSource m_ResendUnackedCTS = new CancellationTokenSource();
-        private CancellationTokenSource m_ReceiveFromCTS = new CancellationTokenSource();
+        /// <summary>
+        /// CancellationTokenSource that can be set to cancel the ResendTimedOutPacketsAsync() task.
+        /// </summary>
+        protected CancellationTokenSource m_ResendUnackedCTS = new CancellationTokenSource();
 
-        private int m_UDPTimeout = 5;
+        /// <summary>
+        /// CancellationTokenSource that can be set to cancel the ReceiveFromAsync() task.
+        /// </summary>
+        protected CancellationTokenSource m_ReceiveFromCTS = new CancellationTokenSource();
+
+        /// <summary>
+        /// The number of seconds before packets are considered to be
+        /// timed out and an ack will be resent.
+        /// </summary>
+        protected int m_UDPTimeout = 5;
 
         /// <summary>
         /// Gets or sets the time in seconds before a UDP packet is considered lost.
@@ -152,7 +163,11 @@ namespace Parlo
             set { m_UDPTimeout = value; }
         }
 
-        private int m_MaxResends = 5;
+        /// <summary>
+        /// The maximum number of times a packet can be resent over UDP.
+        /// Defaults to 5.
+        /// </summary>
+        protected int m_MaxResends = 5;
 
         /// <summary>
         /// Gets or sets the maximum number of times a packet can be resent over UDP
@@ -392,10 +407,7 @@ namespace Parlo
             if (Sock.SockType == SocketType.Stream)
                 m_ProcessingBuffer.OnProcessedPacket += M_ProcessingBuffer_OnProcessedPacket;
             else
-            {
                 _ = ResendTimedOutPacketsAsync();
-                _ = ReceiveFromAsync();
-            }
         }
 
         /// <summary>
@@ -650,6 +662,7 @@ namespace Parlo
                             Logger.Log($"Resending timed-out packet with sequence number: {SequenceNumber}", LogLevel.info);
                             if (m_SentPackets[SequenceNumber].NumRetransmissions < m_MaxResends)
                             {
+                                //TODO: Add error checking here.
                                 await m_Sock.SendToAsync(new ArraySegment<byte>(PacketData), SocketFlags.None,
                                     m_Sock.RemoteEndPoint);
                                 int Retransmissions = m_SentPackets[SequenceNumber].NumRetransmissions;
@@ -692,7 +705,7 @@ namespace Parlo
         /// <param name="SenderEndPoint">The endpoint to send to.</param>
         /// <param name="SequenceNumber">The sequence number of the packet to acknowledge.</param>
         /// <returns>An avaitable task.</returns>
-        private async Task SendAcknowledgementAsync(EndPoint SenderEndPoint, int SequenceNumber)
+        protected async Task SendAcknowledgementAsync(EndPoint SenderEndPoint, int SequenceNumber)
         {
             m_LastAcknowledgedSequenceNumber = Math.Max(m_LastAcknowledgedSequenceNumber, SequenceNumber);
             string AcknowledgmentMessage = $"ACK|{m_LastAcknowledgedSequenceNumber}";
@@ -701,9 +714,19 @@ namespace Parlo
             await m_Sock.SendToAsync(new ArraySegment<byte>(AcknowledgmentData), SocketFlags.None, SenderEndPoint);
         }
 
-        private ConcurrentDictionary<int, (byte[] PacketData, DateTime SentTime, int NumRetransmissions)> m_SentPackets = 
+        /// <summary>
+        /// Packets that have been sent but not yet acknowledged.
+        /// </summary>
+        protected ConcurrentDictionary<int, (byte[] PacketData, DateTime SentTime, int NumRetransmissions)> m_SentPackets = 
             new ConcurrentDictionary<int, (byte[], DateTime, int)>();
-        private int m_SequenceNumber = 0, m_LastAcknowledgedSequenceNumber = 0;
+        
+        private int m_SequenceNumber = 0; 
+        
+        /// <summary>
+        /// The last acknowledged sequence number.
+        /// </summary>
+        protected int m_LastAcknowledgedSequenceNumber = 0;
+
         private ConcurrentSet<int> m_OutOfOrderPackets = new ConcurrentSet<int>();
 
         /// <summary>
@@ -810,7 +833,7 @@ namespace Parlo
         /// <returns>An awaitable task.</returns>
         /// <exception cref="SocketException">Thrown if a <see cref="SocketException"/> occured during sending.</exception>
         /// <exception cref="Exception">Thrown if an <see cref="Exception"/> occured during sending.</exception>
-        private async Task ReceiveFromAsync()
+        public async Task ReceiveFromAsync()
         {
             byte[] ReceiveBuffer = new byte[MTU];
 
@@ -823,7 +846,6 @@ namespace Parlo
                 {
                     //Receive the data and store the sender's endpoint
                     SocketReceiveFromResult Result = await m_Sock.ReceiveFromAsync(new ArraySegment<byte>(ReceiveBuffer),
-                        SocketFlags.None, new IPEndPoint(IPAddress.Parse(m_Sock.Address), 0));
                         SocketFlags.None, new IPEndPoint(IPAddress.Parse(m_Sock.Address), m_Sock.Port));
 
                     //Process the received data
