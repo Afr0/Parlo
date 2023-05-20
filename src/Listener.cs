@@ -94,12 +94,20 @@ namespace Parlo
         }
 
         /// <summary>
-        /// Initializes this Listener instance. Throws SocketException if something went haywire.
+        /// Starts listening for incoming clients on the specified endpoint if the socket
+        /// was set to <see cref="SocketType.Stream"/>. 
+        /// If the socket was set to <see cref="SocketType.Dgram"/>, the socket will be bound
+        /// to the specified endpoint, but no listening will be done.
         /// </summary>
         /// <param name="LocalEP">The endpoint to listen on.</param>
         /// <param name="MaxPacketSize">Maximum packet size. Defaults to 1024 bytes.</param>
-        /// <param name="AcceptCToken">Optional parameter that can be used to cancel the Accept() task
+        /// <param name="AcceptCToken">Optional parameter that can be used to cancel the Accept() task.
         /// that starts running when calling this method. Used for testing.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="LocalEP"/> was null.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <see cref="ISocket"/> used to
+        /// initialize this Listener wasn't set to <see cref="SocketType.Stream"/>.</exception>
+        /// <exception cref="SocketException">Thrown if the socket used to construct this Listener couldn't
+        /// Bind() to or Listen() on <paramref name="LocalEP"/>.</exception>
         public virtual async Task InitializeAsync(IPEndPoint LocalEP, int MaxPacketSize = 1024, 
             CancellationTokenSource AcceptCToken = default)
         {
