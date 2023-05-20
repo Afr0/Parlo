@@ -111,6 +111,9 @@ namespace Parlo
         public virtual async Task InitializeAsync(IPEndPoint LocalEP, int MaxPacketSize = 1024, 
             CancellationTokenSource AcceptCToken = default)
         {
+            if(m_ListenerSock.SockType != SocketType.Stream && m_ListenerSock.SockType != SocketType.Dgram)
+                throw new ArgumentException("Socket must be of type SocketType.Stream or SocketType.DGram!");
+
             m_LocalEP = LocalEP ?? throw new ArgumentNullException("LocalEP!");
             m_AcceptCTS = AcceptCToken ?? new CancellationTokenSource();
 
@@ -125,6 +128,7 @@ namespace Parlo
             catch (SocketException E)
             {
                 Logger.Log("Exception occured in Listener.InitializeAsync(): " + E.ToString(), LogLevel.error);
+                throw E;
             }
 
             await AcceptAsync();
