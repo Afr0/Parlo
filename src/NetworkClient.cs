@@ -691,6 +691,11 @@ namespace Parlo
 
                     KeysToRemove.Clear();
                 }
+                catch(SocketException Ex)
+                {
+                    Logger.Log("SocketException in ResendTimedOutPacketsAsync: " + Ex.Message, LogLevel.error);
+                    OnNetworkError?.Invoke(Ex);
+                }
                 catch (Exception Ex)
                 {
                     Logger.Log("Error in ResendTimedOutPacketsAsync: " + Ex.Message, LogLevel.error);
@@ -889,13 +894,14 @@ namespace Parlo
                         await ProcessReceivedDataAsync(Result.RemoteEndPoint, ReceivedData);
                     }
                 }
-                catch (SocketException E)
+                catch (SocketException Ex)
                 {
-                    Logger.Log("Error receiving data: " + E.Message, LogLevel.error);
+                    Logger.Log("Error receiving data: " + Ex.Message, LogLevel.error);
+                    OnNetworkError?.Invoke(Ex);
                 }
                 catch (Exception Ex)
                 {
-                    Logger.Log("Error receiving data: " + Ex.Message, LogLevel.error);
+                    Logger.Log("Error receiving data: " + Ex.Message, LogLevel.error);;
                 }
             }
         }
