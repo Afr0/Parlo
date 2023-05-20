@@ -406,8 +406,6 @@ namespace Parlo
 
             if (Sock.SockType == SocketType.Stream)
                 m_ProcessingBuffer.OnProcessedPacket += M_ProcessingBuffer_OnProcessedPacket;
-            else
-                _ = ResendTimedOutPacketsAsync();
         }
 
         /// <summary>
@@ -454,11 +452,6 @@ namespace Parlo
 
                 lock (m_ConnectedLock)
                     m_Connected = true;
-            }
-            else
-            {
-                _ = ResendTimedOutPacketsAsync();
-                _ = ReceiveFromAsync();
             }
         }
 
@@ -554,6 +547,35 @@ namespace Parlo
                     OnNetworkError?.Invoke(e);
                 }
             }
+        }
+
+        /// <summary>
+        /// Starts receiving UDP data and resending timed out packets.
+        /// If a <see cref="SocketException"/> occurs, the <see cref="OnNetworkError"/> event is invoked.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the <see cref="ISocket"/> that this client was constructed 
+        /// with didn't have a SocketType of DGram.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the <see cref="ISocket.RemoteEndPoint"/> was null.</exception>
+        public void StartReceiveFromAsync()
+        {
+            if(m_Sock.SockType != SocketType.Dgram)
+                throw new InvalidOperationException("This method can only be called on UDP clients.");
+            if(m_Sock.RemoteEndPoint == null)
+                throw new InvalidOperationException("Remote endpoint cannot be null!");
+
+            try
+            {
+                m_Sock.Bind(m_Sock.RemoteEndPoint);
+            }
+            catch(SocketException Ex)
+            {
+                Logger.Log("SocketException in NetworkClient.Bind : " + Ex.Message, LogLevel.error);
+                OnNetworkError?.Invoke(Ex);
+            }
+
+            //We don't need to check these tasks, as they will deal with errors internally.
+            _ = ResendTimedOutPacketsAsync();
+            _ = ReceiveFromAsync();
         }
 
         /// <summary>
@@ -839,7 +861,7 @@ namespace Parlo
         /// <returns>An awaitable task.</returns>
         /// <exception cref="SocketException">Thrown if a <see cref="SocketException"/> occured during sending.</exception>
         /// <exception cref="Exception">Thrown if an <see cref="Exception"/> occured during sending.</exception>
-        public async Task ReceiveFromAsync()
+        private async Task ReceiveFromAsync()
         {
             byte[] ReceiveBuffer = new byte[MTU];
 
