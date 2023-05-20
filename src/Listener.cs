@@ -35,7 +35,7 @@ namespace Parlo
         /// <summary>
         /// Internal list of <see cref="NetworkClient"/ instances connected to this Listener.>
         /// </summary>
-        protected BlockingCollection<NetworkClient> m_NetworkClients;
+        protected BlockingCollection<NetworkClient> m_NetworkClients = new BlockingCollection<NetworkClient>();
 
         /// <summary>
         /// The <see cref="ISocket"/> used for listening and accepting clients.
@@ -90,7 +90,6 @@ namespace Parlo
         public Listener(ISocket Sock)
         {
             m_ListenerSock = Sock;
-            m_NetworkClients = new BlockingCollection<NetworkClient>();
         }
 
         /// <summary>
