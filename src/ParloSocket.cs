@@ -243,9 +243,16 @@ namespace Parlo
         /// <summary>
         /// Associates a socket with a local endpoint.
         /// </summary>
-        /// <param name="LocalEP">The locaL endpoint to associate with the <see cref="ParloSocket"/></param>
+        /// <param name="LocalEP">The local endpoint to associate with the <see cref="ParloSocket"/>.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="LocalEP"/> was null.</exception>
+        /// <exception cref="SocketException">Thrown if the <see cref="ParloSocket"/> 
+        /// couldn't bind to <paramref name="LocalEP"/>.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if this method was called on a disposed instance.</exception>
         public void Bind(EndPoint LocalEP)
         {
+            if (LocalEP == null)
+                throw new ArgumentNullException("LocalEP");
+
             m_SocketSemaphore.Wait();
 
             try
@@ -254,6 +261,16 @@ namespace Parlo
                 m_Port = ((IPEndPoint)LocalEP).Port;
 
                 m_Socket.Bind(LocalEP);
+            }
+            catch(SocketException Ex)
+            {
+                Logger.Log("SocketException in ParloSocket.Bind: " + Ex.Message, LogLevel.error);
+                throw Ex;
+            }
+            catch (ObjectDisposedException Ex)
+            {
+                Logger.Log("ObjectDisposedException in ParloSocket.Bind: " + Ex.Message, LogLevel.error);
+                throw Ex;
             }
             finally
             {
@@ -265,6 +282,9 @@ namespace Parlo
         /// Places a <see cref="ParloSocket"/> in a listening state.
         /// </summary>
         /// <param name="Backlog">The maximum length of the pending connections queue.</param>
+        /// <exception cref="SocketException">Thrown if the <see cref="ParloSocket"/> 
+        /// couldn't listen to <see cref="RemoteEndPoint"/>.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if this method was called on a disposed instance.</exception>
         public void Listen(int Backlog)
         {
             m_SocketSemaphore.Wait();
@@ -272,6 +292,16 @@ namespace Parlo
             try
             {
                 m_Socket.Listen(Backlog);
+            }
+            catch(SocketException Ex)
+            {
+                Logger.Log("SocketException in ParloSocket.Listen: " + Ex.Message, LogLevel.error);
+                throw Ex;
+            }
+            catch (ObjectDisposedException Ex)
+            {
+                Logger.Log("ObjectDisposedException in ParloSocket.Listen: " + Ex.Message, LogLevel.error);
+                throw Ex;
             }
             finally
             {
@@ -332,6 +362,8 @@ namespace Parlo
         /// <param name="Level">One of the SocletOptionLevel values.</param>
         /// <param name="Name">One of the SocketOptionName values.</param>
         /// <param name="Value">The value of the option, represented as a bool.</param>
+        /// <exception cref="SocketException">Thrown if the <see cref="ParloSocket"/> 
+        /// couldn't set the socket option.</exception>
         public void SetSocketOption(SocketOptionLevel Level, SocketOptionName Name, bool Value)
         {
             m_SocketSemaphore.Wait();
@@ -339,6 +371,11 @@ namespace Parlo
             try
             {
                 m_Socket.SetSocketOption(Level, Name, Value);
+            }
+            catch (SocketException Ex)
+            {
+                Logger.Log("SocketException in ParloSocket.SetSocketOption: " + Ex.Message, LogLevel.error);
+                throw Ex;
             }
             finally
             {
@@ -460,6 +497,9 @@ namespace Parlo
         /// </summary>
         /// <param name="How">One of the <see cref="SocketShutdown"/> values that specifies that the operation will 
         /// no longer be allowed.</param>
+        /// <exception cref="SocketException">Thrown if the <see cref="ParloSocket"/>
+        /// couldn't shut down.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if this method was called on a disposed instance.</exception>
         public void Shutdown(SocketShutdown How)
         {
             m_SocketSemaphore.Wait();
@@ -467,6 +507,16 @@ namespace Parlo
             try
             {
                 m_Socket.Shutdown(How);
+            }
+            catch (SocketException Ex)
+            {
+                Logger.Log("SocketException in ParloSocket.Shutdown: " + Ex.Message, LogLevel.error);
+                throw Ex;
+            }
+            catch (ObjectDisposedException Ex)
+            {
+                Logger.Log("ObjectDisposedException in ParloSocket.Shutdown: " + Ex.Message, LogLevel.error);
+                throw Ex;
             }
             finally
             {
@@ -493,7 +543,9 @@ namespace Parlo
         /// <summary>
         /// Closes the socket connection and allows reuse of the socket.
         /// </summary>
+        /// <exception cref="SocketException">Thrown if the <see cref="ParloSocket"/> disconnect.</exception>
         /// <param name="ReuseSocket">True if this socket can be reused after the connection is closed; otherwise false.</param>
+        /// <exception cref="ObjectDisposedException">Thrown if this method was called on a disposed instance.</exception>
         public void Disconnect(bool ReuseSocket)
         {
             m_SocketSemaphore.Wait();
@@ -501,6 +553,16 @@ namespace Parlo
             try
             {
                 m_Socket.Disconnect(ReuseSocket);
+            }
+            catch (SocketException Ex)
+            {
+                Logger.Log("SocketException in ParloSocket.Disconnect: " + Ex.Message, LogLevel.error);
+                throw Ex;
+            }
+            catch (ObjectDisposedException Ex)
+            {
+                Logger.Log("ObjectDisposedException in ParloSocket.Disconnect: " + Ex.Message, LogLevel.error);
+                throw Ex;
             }
             finally
             {
