@@ -123,7 +123,9 @@ namespace Parlo
             try
             {
                 m_ListenerSock.Bind(LocalEP);
-                m_ListenerSock.Listen(10000);
+
+                if(m_ListenerSock.SockType == SocketType.Stream)
+                    m_ListenerSock.Listen(10000);
             }
             catch (SocketException E)
             {
