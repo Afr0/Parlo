@@ -519,6 +519,7 @@ namespace Parlo
 
         /// <summary>
         /// Connects to a server.
+        /// If a <see cref="SocketException"/> occurs, the <see cref="OnNetworkError"/> is invoked.
         /// </summary>
         /// <param name="LoginArgs">Arguments used for login.</param>
         public async Task ConnectAsync(LoginArgsContainer LoginArgs)
