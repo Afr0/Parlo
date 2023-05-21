@@ -10,47 +10,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Parlo.Tests
 {
-    internal class TestListener : Listener
-    {
-        public TestListener(ISocket Socket) : base(Socket)
-        {
-        }
-
-        protected override async Task AcceptAsync()
-        {
-            while (true)
-            {
-                if (m_AcceptCTS.IsCancellationRequested)
-                    break;
-
-                ISocket AcceptedSocketInterface = await m_ListenerSock.AcceptAsync();
-
-                if (AcceptedSocketInterface != null)
-                {
-                    Logger.Log("\nNew client connected!\r\n", LogLevel.info);
-
-                    //Set max missed heartbeats to 0, for testing purposes.
-                    NetworkClient NewClient = new NetworkClient(AcceptedSocketInterface, this, 5, 0, null, 
-                        NewClient_OnConnectionLostWrapper);
-                    NewClient.OnClientDisconnected += async (Client) => await NewClient_OnClientDisconnected(Client);
-                    NewClient.OnConnectionLost += async (Client) => await NewClient_OnConnectionLost(Client);
-
-                    m_NetworkClients.Add(NewClient);
-                }
-            }
-        }
-
-        /// <summary>
-        /// A wrapper for the protected <see cref="Listener.NewClient_OnClientDisconnected(NetworkClient)"/> method.
-        /// </summary>
-        /// <param name="Sender"></param>
-        protected void NewClient_OnConnectionLostWrapper(NetworkClient Sender)
-        {
-            //This will attempt to fire the listener's OnDisconnected event.
-            _ = NewClient_OnConnectionLost(Sender);
-        }
-    }
-
     /// <summary>
     /// Internal class used for testing the <see cref="NetworkClient"/> class.
     /// Exposes some of the protected members of the class.
@@ -207,7 +166,7 @@ namespace Parlo.Tests
             //Arrange
             Mock<ISocket> MockServerSocket = new Mock<ISocket>();
             MockServerSocket.SetupGet(y => y.SockType).Returns(SocketType.Stream);
-            TestListener Server = new TestListener(MockServerSocket.Object);
+            Listener Server = new Listener(MockServerSocket.Object);
             bool MissedHeartbeatDetected = false;
 
             Server.OnDisconnected += (Sender) =>

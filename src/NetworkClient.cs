@@ -26,6 +26,7 @@ using Parlo.Collections;
 using System.Xml.Schema;
 using Parlo.Exceptions;
 
+[assembly: InternalsVisibleTo("Parlo.Tests")]
 namespace Parlo
 {
     /// <summary>
@@ -468,7 +469,7 @@ namespace Parlo
         /// <param name="OnConnectionLostAction">An action to be called when the connection is lost. Defaults to null.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="ClientSocket"/> or <paramref name="Server"/>
         /// is null.</exception>
-        public NetworkClient(ISocket ClientSocket, Listener Server, int HeartbeatInterval = 5, int MaxMissedHeartbeats = 6,
+        internal NetworkClient(ISocket ClientSocket, Listener Server, int HeartbeatInterval = 5, int MaxMissedHeartbeats = 6,
             Action<NetworkClient> OnClientDisconnectedAction = null,
             Action<NetworkClient> OnConnectionLostAction = null)
         {
