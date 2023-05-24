@@ -381,10 +381,15 @@ namespace Parlo
         /// <param name="Sock">A socket for connecting.</param>
         /// <param name="MaxPacketSize">Maximum packet size. Defaults to 1024 bytes.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="Sock"/> was null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="Sock"/> had a <see cref="SocketType"/>
+        /// of <see cref="SocketType.Dgram"/>.</exception>
         public NetworkClient(ISocket Sock, int MaxPacketSize = 1024)
         {
             if (Sock == null)
                 throw new ArgumentNullException("Sock was null!");
+
+            if (Sock.SockType == SocketType.Dgram)
+                throw new InvalidOperationException("Please use Parlo.UDPNetworkClient for UDP connections!");
 
             m_Sock = Sock;
 
@@ -417,10 +422,15 @@ namespace Parlo
         /// <param name="MaxPacketSize">Maximum packet size. Defaults to 1024 bytes.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="ClientSocket"/> or <paramref name="Server"/>
         /// was null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="ClientSocket"/> had a <see cref="SocketType"/>
+        /// of <see cref="SocketType.Dgram"/>.</exception>
         public NetworkClient(ISocket ClientSocket, Listener Server, int MaxPacketSize = 1024)
         {
             if (ClientSocket == null || Server == null)
                 throw new ArgumentNullException("ClientSocket or Server!");
+
+            if (ClientSocket.SockType == SocketType.Dgram)
+                throw new InvalidOperationException("Please use Parlo.UDPNetworkClient for UDP connections!");
 
             m_Sock = ClientSocket;
             m_Listener = Server;
@@ -469,12 +479,17 @@ namespace Parlo
         /// <param name="OnConnectionLostAction">An action to be called when the connection is lost. Defaults to null.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="ClientSocket"/> or <paramref name="Server"/>
         /// is null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="ClientSocket"/> had a <see cref="SocketType"/>
+        /// of <see cref="SocketType.Dgram"/>.</exception>
         internal NetworkClient(ISocket ClientSocket, Listener Server, int HeartbeatInterval = 5, int MaxMissedHeartbeats = 6,
             Action<NetworkClient> OnClientDisconnectedAction = null,
             Action<NetworkClient> OnConnectionLostAction = null)
         {
             if (ClientSocket == null || Server == null)
                 throw new ArgumentNullException("ClientSocket or Server!");
+
+            if (ClientSocket.SockType == SocketType.Dgram)
+                throw new InvalidOperationException("Please use Parlo.UDPNetworkClient for UDP connections!");
 
             m_Sock = ClientSocket;
             m_Listener = Server;
@@ -1262,7 +1277,9 @@ namespace Parlo
                     await Task.Delay(10); //STOP HOGGING THE PROCESSOR!
                 }
                 catch (SocketException)
+                catch (SocketException Ex)
                 {
+                    Logger.Log("Exception in NetworkClient.ReceiveAsync: " + Ex.ToString(), LogLevel.error);
                     await DisconnectAsync(false);
                     return;
                 }
