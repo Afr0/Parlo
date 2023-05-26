@@ -33,7 +33,7 @@ namespace Parlo
     public class Listener : IDisposable, IAsyncDisposable
     {
         /// <summary>
-        /// Internal list of <see cref="NetworkClient"/ instances connected to this Listener.>
+        /// Internal list of <see cref="NetworkClient"/> instances connected to this Listener.>
         /// </summary>
         protected BlockingCollection<NetworkClient> m_NetworkClients = new BlockingCollection<NetworkClient>();
 

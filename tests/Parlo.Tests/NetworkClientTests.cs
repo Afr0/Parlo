@@ -220,22 +220,22 @@ namespace Parlo.Tests
             MockSocket.SetupGet(y => y.AFamily).Returns(AddressFamily.InterNetwork);
             MockSocket.SetupGet(y => y.Address).Returns("127.0.0.1");
             MockSocket.SetupGet(y => y.Port).Returns(8080);
-            TestClient Client = null;
+            UDPNetworkClient Client = null;
 
             MockSocket.Setup(s => s.SendToAsync(It.IsAny<ArraySegment<byte>>(), SocketFlags.None, It.IsAny<EndPoint>()))
                 .ReturnsAsync(1);
             MockSocket.Setup(s => s.ReceiveFromAsync(It.IsAny<ArraySegment<byte>>(), SocketFlags.None, It.IsAny<EndPoint>()))
                 .ReturnsAsync(new SocketReceiveFromResult() { ReceivedBytes = 9, RemoteEndPoint = IPEndPoint.Parse("127.0.0.1") });
 
-            Client = new TestClient(MockSocket.Object);
+            Client = new UDPNetworkClient(MockSocket.Object);
             Client.UDPTimeout = 1;
             Client.MaxResends = 2;
-            Client.SentPackets.TryAdd(1, (new byte[] { 1, 2, 3 }, DateTime.UtcNow.AddSeconds(-2), 1));
+            Client.m_SentPackets.TryAdd(1, (new byte[] { 1, 2, 3 }, DateTime.UtcNow.AddSeconds(-2), 1));
 
             //Act
-            Task ResendTask = Client.ResendTimedoutPacketsAsync();
+            Task ResendTask = Client.ResendTimedOutPacketsAsync();
             await Task.Delay(2000);
-            Client.ResendUnackedCTS.Cancel(); // Cancel the method
+            Client.m_ResendUnackedCTS.Cancel(); // Cancel the method
 
             //Assert
 
@@ -247,7 +247,7 @@ namespace Parlo.Tests
             //Verifies that the count of sent packets in the client is zero.
             //This confirms that the packet was removed from the sent
             //packets list.
-            Assert.AreEqual(0, Client.SentPackets.Count);
+            Assert.AreEqual(0, Client.m_SentPackets.Count);
         }
 
         /// <summary>
@@ -266,17 +266,17 @@ namespace Parlo.Tests
             MockSocket.Setup(s => s.SendToAsync(It.IsAny<ArraySegment<byte>>(), SocketFlags.None, It.IsAny<EndPoint>()))
                 .ReturnsAsync(1);
 
-            TestClient Client = new TestClient(MockSocket.Object);
-            Client.LastAckedSequenceNumber = 0;
+            UDPNetworkClient Client = new UDPNetworkClient(MockSocket.Object);
+            Client.m_LastAcknowledgedSequenceNumber = 0;
             int TestSeqNum = 5;
 
             //Act
-            await Client.SendAckAsync(new IPEndPoint(IPAddress.Loopback, 5000), TestSeqNum);
+            await Client.SendAcknowledgementAsync(new IPEndPoint(IPAddress.Loopback, 5000), TestSeqNum);
 
             //Assert
             MockSocket.Verify(x => x.SendToAsync(It.IsAny<ArraySegment<byte>>(), SocketFlags.None, It.IsAny<EndPoint>()), 
                 Times.Once());
-            Assert.AreEqual(TestSeqNum, Client.LastAckedSequenceNumber);
+            Assert.AreEqual(TestSeqNum, Client.m_LastAcknowledgedSequenceNumber);
         }
     }
 }
