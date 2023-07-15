@@ -41,7 +41,7 @@ namespace Parlo
     /// </summary>
     /// <param name="Sender">The NetworkClient instance that sent or received the packet.</param>
     /// <param name="P">The Packet that was received.</param>
-	public delegate void ReceivedPacketDelegate(NetworkClient Sender, Packet P);
+	public delegate Task ReceivedPacketDelegate(NetworkClient Sender, Packet P);
 
     /// <summary>
     /// Occurs when a client connected to a server.

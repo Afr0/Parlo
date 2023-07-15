@@ -10,6 +10,7 @@ Mats 'Afr0' Vederhus. All Rights Reserved.
 Contributor(s): ______________________________________.
 */
 
+using System.Threading.Tasks;
 using Parlo.Packets;
 
 namespace Parlo
@@ -19,7 +20,7 @@ namespace Parlo
     /// </summary>
     /// <param name="Client">The <see cref="NetworkClient"/> that received the packet.</param>
     /// <param name="P">The <see cref="Packet"/> that was received.</param>
-    public delegate void OnPacketReceived(NetworkClient Client, Packet P);
+    public delegate Task OnPacketReceived(NetworkClient Client, Packet P);
 
     /// <summary>
     /// A handler for a ProcessedPacket instance.
