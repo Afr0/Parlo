@@ -608,7 +608,7 @@ namespace Parlo
         /// We processed a packet, hurray!
         /// </summary>
         /// <param name="ProcessedPacket">The packet that was processed.</param>
-        private void M_ProcessingBuffer_OnProcessedPacket(Packet ProcessedPacket)
+        private async Task M_ProcessingBuffer_OnProcessedPacket(Packet ProcessedPacket)
         {
             if (ProcessedPacket.ID == (byte)ParloIDs.SGoodbye)
             {
@@ -622,11 +622,13 @@ namespace Parlo
             }
             if (ProcessedPacket.ID == (byte)ParloIDs.Heartbeat)
             {
-                lock (m_IsAliveLock) //Just lock here because this section is not async.
+                await m_IsAliveLock.WaitAsync();
                     m_IsAlive = true;
+                m_IsAliveLock.Release();
 
-                lock (m_MissedHeartbeatsLock) //Just lock here because this section is not async.
+                await m_MissedHeartbeatsLock.WaitAsync();
                     m_MissedHeartbeats = 0;
+                m_MissedHeartbeatsLock.Release();
 
                 HeartbeatPacket Heartbeat = HeartbeatPacket.ByteArrayToObject(ProcessedPacket.Data);
                 TimeSpan Duration = DateTime.UtcNow - Heartbeat.SentTimestamp;
@@ -640,10 +642,10 @@ namespace Parlo
             if (ProcessedPacket.IsCompressed == 1)
             {
                 byte[] DecompressedData = DecompressData(ProcessedPacket.Data);
-                OnReceivedData?.Invoke(this, new Packet(ProcessedPacket.ID, DecompressedData, false));
+                await OnReceivedData?.Invoke(this, new Packet(ProcessedPacket.ID, DecompressedData, false));
             }
             else
-                OnReceivedData?.Invoke(this, ProcessedPacket);
+                await OnReceivedData?.Invoke(this, ProcessedPacket);
         }
 
         /// <summary>

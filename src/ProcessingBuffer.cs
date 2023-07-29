@@ -21,7 +21,7 @@ using Parlo.Exceptions;
 [assembly: InternalsVisibleTo("Parlo.Tests")]
 namespace Parlo
 {
-    delegate void ProcessedPacketDelegate(Packet Packet);
+    delegate Task ProcessedPacketDelegate(Packet Packet);
 
     /// <summary>
     /// A buffer for processing received data, turning it into individual PacketStream instances.
@@ -100,7 +100,7 @@ namespace Parlo
                             Packet P;
                             P = new Packet(m_CurrentID, PacketData, (m_IsCompressed == 1) ? true : false);
 
-                            OnProcessedPacket(P);
+                            await OnProcessedPacket(P);
                         }
                     }
 
