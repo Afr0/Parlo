@@ -506,7 +506,7 @@ namespace Parlo
         /// <param name="IsUDPData">Is this data sent over UDP?</param>
         /// <returns>The compressed data as an array of bytes.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="Data"/> is null.</exception>
-        private byte[] CompressData(byte[] Data, bool IsUDPData = false)
+        private byte[] CompressData(byte[] Data)
         {
             if(Data == null)
                 throw new ArgumentNullException(nameof(Data));
@@ -515,16 +515,8 @@ namespace Parlo
             {
                 using (var GzipStream = new GZipStream(CompressedStream, CompressionLevel))
                 {
-                    if (!IsUDPData)
-                    {
-                        GzipStream.Write(Data, 3, Data.Length); //Start reading at offset 3, because the header is 4 bytes.
-                        GzipStream.Flush();
-                    }
-                    else
-                    {
-                        GzipStream.Write(Data, 4, Data.Length); //Start reading at offset 4, because the header is 5 bytes.
-                        GzipStream.Flush();
-                    }
+                    GzipStream.Write(Data, 3, Data.Length); //Start reading at offset 3, because the header is 4 bytes.
+                    GzipStream.Flush();
                 }
 
                 return CompressedStream.ToArray();

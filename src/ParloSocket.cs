@@ -253,8 +253,6 @@ namespace Parlo
             if (LocalEP == null)
                 throw new ArgumentNullException("LocalEP");
 
-            m_SocketSemaphore.Wait();
-
             try
             {
                 m_Address = ((IPEndPoint)LocalEP).Address.ToString();
@@ -272,10 +270,6 @@ namespace Parlo
                 Logger.Log("ObjectDisposedException in ParloSocket.Bind: " + Ex.Message, LogLevel.error);
                 throw Ex;
             }
-            finally
-            {
-                m_SocketSemaphore.Release();
-            }
         }
 
         /// <summary>
@@ -287,8 +281,6 @@ namespace Parlo
         /// <exception cref="ObjectDisposedException">Thrown if this method was called on a disposed instance.</exception>
         public void Listen(int Backlog)
         {
-            m_SocketSemaphore.Wait();
-
             try
             {
                 m_Socket.Listen(Backlog);
@@ -303,10 +295,6 @@ namespace Parlo
                 Logger.Log("ObjectDisposedException in ParloSocket.Listen: " + Ex.Message, LogLevel.error);
                 throw Ex;
             }
-            finally
-            {
-                m_SocketSemaphore.Release();
-            }
         }
 
         /// <summary>
@@ -320,6 +308,7 @@ namespace Parlo
             Socket AcceptedSocket;
 
             await m_SocketSemaphore.WaitAsync();
+
             try
             {
                 AcceptedSocket = await m_Socket.AcceptAsync();
