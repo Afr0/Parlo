@@ -223,6 +223,8 @@ namespace Parlo
         protected async Task NewClient_OnClientDisconnected(NetworkClient Sender)
         {
             Logger.Log("Client disconnected!", LogLevel.info);
+            OnDisconnected?.Invoke(Sender);
+            m_NetworkClients?.TryTake(out Sender);
             await Sender.DisposeAsync();
             Sender.Dispose();
         }
