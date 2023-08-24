@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;.NET6.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <GenerateTargetFrameworkAttribute>False</GenerateTargetFrameworkAttribute>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -19,6 +19,7 @@ Applies adaptive compression with GZip to packets for extra smooth network traff
 Has full support for TCP, UDP with optional reliability, as well as encryption with AES or Twofish.</PackageReleaseNotes>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
@@ -33,8 +34,20 @@ Has full support for TCP, UDP with optional reliability, as well as encryption w
     <DefineConstants>MACOS</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="System.Management" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -57,7 +70,6 @@ Has full support for TCP, UDP with optional reliability, as well as encryption w
     <None Remove="LICENSE" />
     <None Remove="Logo.png" />
     <None Remove="packages.config" />
-    <None Remove="README.md" />
   </ItemGroup>
 
 </Project>
