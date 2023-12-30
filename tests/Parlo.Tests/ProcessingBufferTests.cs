@@ -59,7 +59,10 @@ namespace Parlo.Tests
         {
             var processingBuffer = new ProcessingBuffer();
             bool eventFired = false;
-            processingBuffer.OnProcessedPacket += (packet) => eventFired = true;
+            processingBuffer.OnProcessedPacket += async (packet) =>
+            {
+                eventFired = true;
+            };
             byte[] data = new byte[] { 1, 0, 4, 5, 6, 7 };
             processingBuffer.AddData(data);
 
