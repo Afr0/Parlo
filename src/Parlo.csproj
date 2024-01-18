@@ -91,8 +91,9 @@ Applies adaptive compression with GZip to packets for extra smooth network traff
     <None Remove="Logo.png" />
     <None Remove="packages.config" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(IncludeWindowsSpecificCode)' == 'true'">
+  
+  <ItemGroup Condition="'$(Configuration)' == 'ReleaseWindows'">
     <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.0" />
   </ItemGroup>
 </Project>

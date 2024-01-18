@@ -8,25 +8,36 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            configuration: ReleaseLinux
+          - os: windows-latest
+            configuration: ReleaseWindows
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2.4.2
+      - name: Checkout code
+        uses: actions/checkout@v2.4.2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1.9.0
-      with:
-        dotnet-version: '7.0.203'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1.9.0
+        with:
+          dotnet-version: '7.0.203'
 
-    - name: Restore dependencies
-      run: dotnet restore src
-      
-    - name: Build
-      run: dotnet build src --no-restore
+      - name: Add Windows Compatibility Package
+        if: matrix.configuration == 'ReleaseWindows'
+        run: dotnet add src/Parlo.csproj package Microsoft.Windows.Compatibility --version 8.0.0
 
-    - name: Test main project
-      run: dotnet test src --no-build --verbosity normal
+      - name: Restore dependencies
+        run: dotnet restore src
 
-    - name: Test Parlo.tests project
-      run: dotnet test tests/Parlo.Tests/Parlo.Tests.csproj --no-build --verbosity normal
+      - name: Build
+        run: dotnet build src --no-restore --configuration ${{ matrix.configuration }}
+
+      - name: Test main project
+        run: dotnet test src --no-build --verbosity normal --configuration ${{ matrix.configuration }}
+
+      - name: Test Parlo.tests project
+        run: dotnet test tests/Parlo.Tests/Parlo.Tests.csproj --no-build --verbosity normal --configuration ${{ matrix.configuration }}
