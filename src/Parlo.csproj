@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;.NET6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <GenerateTargetFrameworkAttribute>False</GenerateTargetFrameworkAttribute>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -15,11 +15,39 @@
 Applies adaptive compression with GZip to packets for extra smooth network traffic.</Description>
     <Copyright>Copyright Mats Vederhus</Copyright>
     <RepositoryUrl>https://github.com/Afr0/Parlo.git</RepositoryUrl>
-    <PackageReleaseNotes>Initial release!
-Has full support for TCP, UDP with optional reliability, as well as encryption with AES or Twofish.</PackageReleaseNotes>
+    <PackageReleaseNotes>Version 1.2.0.0: Added support for Linux.</PackageReleaseNotes>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <OS>Linux</OS>
+    <Configurations>Debug;DebugLinux;ReleaseWindows;ReleaseLinux</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'ReleaseWindows'">
+    <IncludeWindowsSpecificCode>true</IncludeWindowsSpecificCode>
+    <DefineConstants>TRACE;RELEASE;NETSTANDARD2_1;NET6_0</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'ReleaseLinux'">
+    <IncludeWindowsSpecificCode>false</IncludeWindowsSpecificCode>
+    <DefineConstants>TRACE;RELEASE;NETSTANDARD2_1;NET6_0;LINUX</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'DebugLinux'">
+    <IncludeWindowsSpecificCode>false</IncludeWindowsSpecificCode>
+    <DefineConstants>DEBUG;TRACE;NETSTANDARD2_1;NET6_0;LINUX</DefineConstants>
+    <Optimize>false</Optimize>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE;NETSTANDARD2_1;NET6_0</DefineConstants>
+    <Optimize>false</Optimize>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
@@ -34,20 +62,12 @@ Has full support for TCP, UDP with optional reliability, as well as encryption w
     <DefineConstants>MACOS</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>True</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>False</Optimize>
+  <PropertyGroup Condition="'$(IncludeWindowsSpecificCode)' == 'true'">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Management" Version="7.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-      <None Include="README.md" Pack="true" PackagePath="\"/>
+      <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -72,4 +92,7 @@ Has full support for TCP, UDP with optional reliability, as well as encryption w
     <None Remove="packages.config" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IncludeWindowsSpecificCode)' == 'true'">
+    <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
 </Project>
