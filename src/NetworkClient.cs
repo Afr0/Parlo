@@ -374,6 +374,7 @@ namespace Parlo
                 m_Connected = true;
 
             _ = ReceiveAsync(); // Start the BeginReceive task without awaiting it
+            _ = SendHeartbeatAsync();
 
             m_MissedHeartbeats = 0;
             _ = CheckforMissedHeartbeats();
@@ -434,6 +435,7 @@ namespace Parlo
                 m_Connected = true;
 
             _ = ReceiveAsync(); // Start the BeginReceive task without awaiting it
+            _ = SendHeartbeatAsync();
         }
 
         /// <summary>
