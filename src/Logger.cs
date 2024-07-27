@@ -73,12 +73,12 @@ namespace Parlo
     }
 
     /// <summary>
-    /// A class for subscribing to messages logged by GonzoNet.
+    /// A class for subscribing to messages logged by Parlo.
     /// </summary>
     public static class Logger
     {
         /// <summary>
-        /// Subscribe to this event to receive messages logged by GonzoNet.
+        /// Subscribe to this event to receive messages logged by Parlo.
         /// </summary>
         public static event MessageLoggedDelegate OnMessageLogged;
 
